@@ -1,93 +1,272 @@
-# aypd-m1-factorymethod-notificacion
+# Actividad: sistema de notificaciones con Factory Method
 
+## Introducción
 
+En la actividad anterior se implementó una aplicación Java capaz de enviar un correo electrónico real mediante Gmail. Actualmente, la aplicación se encuentra vinculada directamente con un único medio de comunicación: el correo electrónico.
 
-## Getting started
+En esta actividad se ampliará el sistema para que permita enviar notificaciones mediante dos canales:
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- **correo electrónico real**, reutilizando la implementación anterior;
+- **mensaje SMS simulado**, mostrando el resultado del envío en la consola.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Para organizar la creación de los distintos tipos de notificación se aplicará el patrón de diseño **Factory Method**.
 
-## Add your files
+Factory Method es un patrón creacional que define un método para crear objetos, pero permite que las subclases determinen qué objeto concreto debe generarse. De esta manera, el código principal puede trabajar con un tipo general de notificación sin depender directamente de las clases que implementan el envío por correo o SMS.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+En este caso:
 
+- el creador de correo deberá generar una notificación por correo electrónico;
+- el creador de SMS deberá generar una notificación SMS.
+
+---
+
+## Objetivo
+
+Modificar el proyecto anterior para construir un sistema que permita seleccionar el medio por el cual se enviará una notificación, aplicando Factory Method para crear el canal correspondiente.
+
+---
+
+## Situación planteada
+
+Una institución necesita comunicar avisos a sus estudiantes. Algunos mensajes se enviarán por correo electrónico y otros mediante SMS.
+
+El sistema deberá solicitar al usuario el canal que desea utilizar:
+
+```text
+1. Correo electrónico
+2. SMS
 ```
-cd existing_repo
-git remote add origin https://git.utec.edu.uy/pda/aypd-m1-factorymethod-notificacion.git
-git branch -M main
-git push -uf origin main
+
+Si se selecciona correo electrónico, la aplicación deberá utilizar el envío real desarrollado en la actividad anterior.
+
+Si se selecciona SMS, la aplicación deberá simular el envío mostrando el teléfono destinatario y el contenido del mensaje en la consola.
+
+---
+
+## Estructura sugerida
+
+El proyecto podrá organizarse utilizando las siguientes clases:
+
+| Clase o interfaz | Responsabilidad |
+|---|---|
+| `Notificacion` | Definir la operación general para enviar una notificación. |
+| `NotificacionCorreo` | Implementar el envío real mediante Gmail. |
+| `NotificacionSMS` | Simular el envío de un SMS mediante la consola. |
+| `CreadorNotificacion` | Declarar el Factory Method para crear notificaciones. |
+| `CreadorCorreo` | Crear una notificación por correo. |
+| `CreadorSMS` | Crear una notificación SMS. |
+| `Main` | Solicitar la opción al usuario y utilizar el creador correspondiente. |
+
+La estructura esperada será similar a la siguiente:
+
+```text
+src/main/java/org/example
+├── Notificacion.java
+├── NotificacionCorreo.java
+├── NotificacionSMS.java
+├── CreadorNotificacion.java
+├── CreadorCorreo.java
+├── CreadorSMS.java
+└── Main.java
 ```
 
-## Integrate with your tools
+> Si el proyecto utiliza un paquete diferente de `org.example`, las clases deberán crearse dentro del paquete correspondiente.
 
-- [ ] [Set up project integrations](https://git.utec.edu.uy/pda/aypd-m1-factorymethod-notificacion/-/settings/integrations)
+---
 
-## Collaborate with your team
+## Código base
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+La interfaz general puede comenzar de la siguiente manera:
 
-## Test and Deploy
+```java
+public interface Notificacion {
 
-Use the built-in continuous integration in GitLab.
+    void enviar(
+            String destinatario,
+            String asunto,
+            String contenido
+    ) throws Exception;
+}
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+La clase creadora deberá declarar el Factory Method encargado de crear la notificación:
 
-***
+```java
+public abstract class CreadorNotificacion {
 
-# Editing this README
+    protected abstract Notificacion crearNotificacion();
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+    public void notificar(
+            String destinatario,
+            String asunto,
+            String contenido
+    ) throws Exception {
 
-## Suggestions for a good README
+        Notificacion notificacion = crearNotificacion();
+        notificacion.enviar(destinatario, asunto, contenido);
+    }
+}
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+A partir de esta base deberán implementarse las clases concretas. No es necesario modificar la configuración de Gmail realizada en la actividad anterior.
 
-## Name
-Choose a self-explaining name for your project.
+---
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## Instrucciones
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### 1. Implementar la interfaz `Notificacion`
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+La interfaz deberá establecer una operación común para todos los medios de notificación.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Tanto el correo como el SMS deberán poder utilizarse mediante esta interfaz.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### 2. Implementar `NotificacionCorreo`
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+La clase deberá:
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+- implementar `Notificacion`;
+- reutilizar el código de envío real desarrollado en la actividad anterior;
+- obtener el correo remitente y la contraseña de aplicación desde las variables de entorno;
+- informar en la consola si el correo fue enviado correctamente.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Las variables de entorno deberán continuar llamándose:
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+```text
+CORREO_REMITENTE
+CLAVE_APLICACION
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+No se deben escribir credenciales directamente en el código.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### 3. Implementar `NotificacionSMS`
 
-## License
-For open source projects, say how it is licensed.
+La clase deberá:
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- implementar `Notificacion`;
+- simular el envío mediante la consola;
+- mostrar el teléfono destinatario;
+- mostrar el contenido del mensaje.
+
+No es necesario conectarse con un servicio externo de SMS. El asunto puede recibirse como parámetro, aunque no es obligatorio mostrarlo en la simulación.
+
+### 4. Implementar `CreadorNotificacion`
+
+La clase deberá:
+
+- ser abstracta;
+- declarar el método `crearNotificacion()`;
+- proporcionar un procedimiento general para crear y enviar una notificación.
+
+El método `crearNotificacion()` representará el **Factory Method** de la solución.
+
+### 5. Implementar `CreadorCorreo`
+
+La clase deberá:
+
+- extender `CreadorNotificacion`;
+- implementar el Factory Method;
+- crear el tipo de notificación correspondiente al correo electrónico.
+
+### 6. Implementar `CreadorSMS`
+
+La clase deberá:
+
+- extender `CreadorNotificacion`;
+- implementar el Factory Method;
+- crear el tipo de notificación correspondiente al SMS.
+
+### 7. Implementar la clase `Main`
+
+La clase principal deberá:
+
+- mostrar las opciones de correo y SMS;
+- solicitar una opción al usuario;
+- solicitar los datos necesarios para el envío;
+- seleccionar el creador correspondiente;
+- realizar el envío mediante un objeto de tipo `CreadorNotificacion`;
+- controlar el ingreso de una opción incorrecta.
+
+La clase `Main` no deberá crear directamente objetos de tipo `NotificacionCorreo` o `NotificacionSMS`.
+
+---
+
+## Funcionamiento esperado
+
+### Envío mediante correo electrónico
+
+```text
+Seleccione el medio de notificación:
+1. Correo electrónico
+2. SMS
+
+Opción: 1
+Destinatario: prueba@yopmail.com
+Asunto: Confirmación
+Mensaje: Tu inscripción fue confirmada.
+
+Correo enviado correctamente.
+```
+
+El mensaje deberá llegar realmente a la dirección indicada. Para realizar pruebas puede utilizarse una cuenta propia o un correo temporal de [YOPmail](https://yopmail.com/).
+
+> Los correos temporales deben utilizarse únicamente con mensajes de prueba que no contengan datos personales, contraseñas ni información sensible.
+
+### Envío mediante SMS
+
+```text
+Seleccione el medio de notificación:
+1. Correo electrónico
+2. SMS
+
+Opción: 2
+Teléfono: 099123456
+Mensaje: Tu inscripción fue confirmada.
+
+SMS enviado
+Destinatario: 099123456
+Mensaje: Tu inscripción fue confirmada.
+```
+
+En este caso, el SMS solamente se mostrará en la consola.
+
+---
+
+## Condiciones de implementación
+
+- Se debe mantener la dependencia de Jakarta Mail utilizada en la actividad anterior.
+- Las credenciales de Gmail deben permanecer fuera del código.
+- El correo electrónico debe enviarse realmente.
+- El SMS debe simularse mediante la consola.
+- `NotificacionCorreo` y `NotificacionSMS` deben implementar la misma interfaz.
+- `CreadorCorreo` y `CreadorSMS` deben extender la misma clase creadora.
+- La clase `Main` no debe instanciar directamente los productos concretos.
+- Cada creador concreto debe decidir qué implementación de `Notificacion` crear.
+- El programa debe controlar una opción incorrecta del menú.
+
+---
+
+## Lista de comprobación
+
+- [ ] Existe una interfaz común para las notificaciones.
+- [ ] La notificación por correo implementa la interfaz.
+- [ ] La notificación SMS implementa la interfaz.
+- [ ] El correo electrónico continúa enviándose correctamente.
+- [ ] El SMS se muestra correctamente en la consola.
+- [ ] Existe una clase creadora abstracta.
+- [ ] El Factory Method está declarado en la clase creadora.
+- [ ] Existe un creador concreto para correo.
+- [ ] Existe un creador concreto para SMS.
+- [ ] `Main` trabaja con un objeto de tipo `CreadorNotificacion`.
+- [ ] `Main` no crea directamente una notificación por correo o SMS.
+- [ ] Las credenciales permanecen fuera del código.
+- [ ] El proyecto compila y permite probar ambas opciones.
+
+---
+
+## Desafío adicional opcional
+
+Incorporar una tercera forma de notificación, por ejemplo WhatsApp o una notificación emergente, creando las clases necesarias sin modificar las implementaciones existentes de correo y SMS.
+
+---
+
+*Material elaborado por Área de Programación - LTI*
