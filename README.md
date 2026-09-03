@@ -55,7 +55,7 @@ El proyecto podrá organizarse utilizando las siguientes clases:
 | `CreadorNotificacion` | Declarar el Factory Method para crear notificaciones. |
 | `CreadorCorreo` | Crear una notificación por correo. |
 | `CreadorSMS` | Crear una notificación SMS. |
-| `Main` | Solicitar la opción al usuario y utilizar el creador correspondiente. |
+| `factorymethod_notificacion` | Solicitar la opción al usuario y utilizar el creador correspondiente. |
 
 La estructura esperada será similar a la siguiente:
 
@@ -175,7 +175,7 @@ La clase deberá:
 - implementar el Factory Method;
 - crear el tipo de notificación correspondiente al SMS.
 
-### 7. Implementar la clase `Main`
+### 7. Implementar la clase `factorymethod_notificacion`
 
 La clase principal deberá:
 
@@ -186,7 +186,7 @@ La clase principal deberá:
 - realizar el envío mediante un objeto de tipo `CreadorNotificacion`;
 - controlar el ingreso de una opción incorrecta.
 
-La clase `Main` no deberá crear directamente objetos de tipo `NotificacionCorreo` o `NotificacionSMS`.
+La clase `factorymethod_notificacion` no deberá crear directamente objetos de tipo `NotificacionCorreo` o `NotificacionSMS`.
 
 ---
 
@@ -239,7 +239,7 @@ En este caso, el SMS solamente se mostrará en la consola.
 - El SMS debe simularse mediante la consola.
 - `NotificacionCorreo` y `NotificacionSMS` deben implementar la misma interfaz.
 - `CreadorCorreo` y `CreadorSMS` deben extender la misma clase creadora.
-- La clase `Main` no debe instanciar directamente los productos concretos.
+- La clase `factorymethod_notificacion` no debe instanciar directamente los productos concretos.
 - Cada creador concreto debe decidir qué implementación de `Notificacion` crear.
 - El programa debe controlar una opción incorrecta del menú.
 
@@ -256,8 +256,8 @@ En este caso, el SMS solamente se mostrará en la consola.
 - [ ] El Factory Method está declarado en la clase creadora.
 - [ ] Existe un creador concreto para correo.
 - [ ] Existe un creador concreto para SMS.
-- [ ] `Main` trabaja con un objeto de tipo `CreadorNotificacion`.
-- [ ] `Main` no crea directamente una notificación por correo o SMS.
+- [ ] `factorymethod_notificacion` trabaja con un objeto de tipo `CreadorNotificacion`.
+- [ ] `factorymethod_notificacion` no crea directamente una notificación por correo o SMS.
 - [ ] Las credenciales permanecen fuera del código.
 - [ ] El proyecto compila y permite probar ambas opciones.
 
