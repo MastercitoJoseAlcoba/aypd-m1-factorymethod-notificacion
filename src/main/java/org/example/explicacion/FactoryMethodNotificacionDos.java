@@ -381,7 +381,7 @@ class CreadorWhatsApp
 // 9. MAIN
 // =========================================================
 
-public class Main01 {
+public class FactoryMethodNotificacionDos {
 
 
     public static void main(String[] args) {
